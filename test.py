@@ -291,12 +291,12 @@ class Custom_collider_assoc_lookahead():
     def __init__(self, left : ListGen, right : ListGen, lookahead: int):
         # self.left = left
         # self.right = right
-        self.cycles = 0
         # For now just assume S > T. It's reasonable I guess.
         # indices are
         self.lookahead = lookahead
         self.left_storer = NextNStorer(lookahead, left)
         self.right_storer = NextNStorer(lookahead, right)
+        self.cycles = lookahead
         for i in range(lookahead):
             self.left_storer.refill()
             self.right_storer.refill()    
