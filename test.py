@@ -350,9 +350,40 @@ def genList(length, density):
 
     # Then filter out all the zeros
     return list(filter(lambda x: x != 0, uncompressed))
+
+COLLIDER = 0
+SKIP = 1
+LOOKAHEAD = 2
+ASSOC = 3
+def test_matmul(densityA, size, densityB):
+    A = []
+    B = []
+    for i in range(size):
+        A.append(genList(size, densityA))
+        B.append(genList(size, densityB))
+    
+    for collider in [COLLIDER, SKIP, LOOKAHEAD, ASSOC]:
+        cycles=0
+        for A_vec in A:
+            for B_vec in B:
+                if collider == COLLIDER:
+                    c = Collider(ListGen(left), ListGen(right))
+                if collider == SKIP:
+                    c = Collider_with_skip(ListGen(left), ListGen(right), 10)
+                if collider == LOOKAHEAD:
+                    c = Custom_collider_lookahead(ListGen(left), ListGen(right), 10)
+                if collider == ASSOC:
+                    c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
+                cycles += c.cycles_for_all_collisions()
+        print(collider, cycles)
+
+
+
+    
+
 if __name__ == '__main__':
-    left = (genList(1000, 0.1))
-    right = (genList(1000, 0.1))
+    left = (genList(100, 0.5))
+    right = (genList(100, 0.5))
     print(left)
     print(right)
 
@@ -365,4 +396,6 @@ if __name__ == '__main__':
 
     c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
     print(c.cycles_for_all_collisions())
+
+    test_matmul(0.25, 80, 0.5)
 
