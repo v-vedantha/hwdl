@@ -355,17 +355,18 @@ COLLIDER = 0
 SKIP = 1
 LOOKAHEAD = 2
 ASSOC = 3
-def test_matmul(densityA, size, densityB):
+def test_matmul(densityA, densityB, M, K, N):
     A = []
     B = []
-    for i in range(size):
-        A.append(genList(size, densityA))
-        B.append(genList(size, densityB))
+    for i in range(M):
+        A.append(genList(K, densityA))
+    for i in range(N):
+        B.append(genList(K, densityB))
     
     for collider in [COLLIDER, SKIP, LOOKAHEAD, ASSOC]:
         cycles=0
-        for A_vec in A:
-            for B_vec in B:
+        for left in A:
+            for right in B:
                 if collider == COLLIDER:
                     c = Collider(ListGen(left), ListGen(right))
                 if collider == SKIP:
@@ -397,5 +398,5 @@ if __name__ == '__main__':
     c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
     print(c.cycles_for_all_collisions())
 
-    test_matmul(0.25, 80, 0.5)
+    test_matmul(0.25, 0.5, 8, 900, 8)
 
