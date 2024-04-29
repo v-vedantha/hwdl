@@ -91,7 +91,7 @@ class Collider():
     def cycles_for_all_collisions(self):
         while True:
             result = self.get_next_collision(self.left, self.right)
-            if self.get_next_collision(self.left, self.right) == DONE:
+            if result == DONE:
                 return self.cycles
             if result == COLLISION:
                 self.ops += 1
@@ -359,7 +359,7 @@ COLLIDER = 0
 SKIP = 1
 LOOKAHEAD = 2
 ASSOC = 3
-collider_names = {COLLIDER : 'classic', SKIP : 'extensor', LOOKAHEAD : 'our custom version (lookahead)', ASSOC : 'hardware friendy lookahead'}
+collider_names = {COLLIDER : 'classic', SKIP : 'extensor (with skip optimizations)', LOOKAHEAD : 'our custom version (lookahead)', ASSOC : 'hardware friendy lookahead'}
 def test_matmul(densityA, densityB, M, K, N):
     print("Simulating a matmul with parameters densityA", densityA, "densityB", densityB, "A =", [M, K], "B =", [K, N])
     print("Algorithmic ops: ", M*K*N)
@@ -369,6 +369,7 @@ def test_matmul(densityA, densityB, M, K, N):
         A.append(genList(K, densityA))
     for i in range(N):
         B.append(genList(K, densityB))
+
     
     for collider in [COLLIDER, SKIP, LOOKAHEAD, ASSOC]:
         cycles=0
@@ -410,5 +411,5 @@ if __name__ == '__main__':
     c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
     print(c.cycles_for_all_collisions())
 
-    test_matmul(0.25, 0.5, 8, 900, 8)
+    test_matmul(0.25, 0.5,1, 900, 1)
 
