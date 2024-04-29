@@ -411,5 +411,5 @@ if __name__ == '__main__':
     c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
     print(c.cycles_for_all_collisions())
 
-    test_matmul(0.25, 0.5,1, 900, 1)
+    test_matmul(0.25, 0.5,80, 90, 80)
 
