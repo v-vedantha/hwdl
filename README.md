@@ -33,4 +33,4 @@ Results (just in case anyone actually looks at this repo):
 - classic : 349700 cycles
 - extensor (with skip optimizations) : 307909 cycles
 - our custom version (lookahead) : 244935 cycles
-hardware friendy lookahead : 329033 cycles
+- hardware friendy lookahead : 329033 cycles
