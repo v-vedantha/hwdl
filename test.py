@@ -412,4 +412,5 @@ if __name__ == '__main__':
     print(c.cycles_for_all_collisions())
 
     test_matmul(0.25, 0.5,80, 90, 80)
+    test_matmul(0.25, 0.5,8, 900, 8)
 
