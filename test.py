@@ -70,6 +70,7 @@ class Collider():
         self.cycles = 0
         self.left.get_next_element()
         self.right.get_next_element()
+        self.ops = 0
 
     def get_next_collision(self, left, right):
         # Normally it's just 
@@ -89,8 +90,11 @@ class Collider():
 
     def cycles_for_all_collisions(self):
         while True:
+            result = self.get_next_collision(self.left, self.right)
             if self.get_next_collision(self.left, self.right) == DONE:
                 return self.cycles
+            if result == COLLISION:
+                self.ops += 1
 
 # Section 5.2 of the paper
 # Basically you set up a bunch of checkpoints, so when you want to skip to a value, you can avoid reading some stuff.
@@ -355,7 +359,10 @@ COLLIDER = 0
 SKIP = 1
 LOOKAHEAD = 2
 ASSOC = 3
+collider_names = {COLLIDER : 'classic', SKIP : 'extensor', LOOKAHEAD : 'our custom version (lookahead)', ASSOC : 'hardware friendy lookahead'}
 def test_matmul(densityA, densityB, M, K, N):
+    print("Simulating a matmul with parameters densityA", densityA, "densityB", densityB, "A =", [M, K], "B =", [K, N])
+    print("Algorithmic ops: ", M*K*N)
     A = []
     B = []
     for i in range(M):
@@ -365,6 +372,7 @@ def test_matmul(densityA, densityB, M, K, N):
     
     for collider in [COLLIDER, SKIP, LOOKAHEAD, ASSOC]:
         cycles=0
+        computes=0
         for left in A:
             for right in B:
                 if collider == COLLIDER:
@@ -376,7 +384,11 @@ def test_matmul(densityA, densityB, M, K, N):
                 if collider == ASSOC:
                     c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), 10)
                 cycles += c.cycles_for_all_collisions()
-        print(collider, cycles)
+                if collider == COLLIDER:
+                    computes+=c.ops
+        if (collider == COLLIDER):
+            print("Real computes:" ,computes)
+        print(collider_names[collider], ":", cycles, "cycles")
 
 
 
