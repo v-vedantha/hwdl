@@ -30,16 +30,16 @@ Results (just in case anyone actually looks at this repo):
 
 Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [80, 90] B = [90, 80]
 - Algorithmic ops:  576000
-- Real computes: 70472
-- classic : 348316 cycles
-- extensor (with skip optimizations) : 310107 cycles
-- our custom version (lookahead) : 246884 cycles
-- hardware friendy lookahead : 327458 cycles
+- Real computes: 70074
+- classic : 349415 cycles
+- extensor (with skip optimizations) : 311537 cycles
+- our custom version (lookahead) : 248786 cycles
+- hardware friendy lookahead : 264281 cycles
 
 Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [8, 900] B = [900, 8]
 - Algorithmic ops:  57600
-- Real computes: 7076
-- classic : 35690 cycles
-- extensor (with skip optimizations) : 35266 cycles
-- our custom version (lookahead) : 25113 cycles
-- hardware friendy lookahead : 29280 cycles 
+- Real computes: 7233
+- classic : 35894 cycles
+- extensor (with skip optimizations) : 35450 cycles
+- our custom version (lookahead) : 25278 cycles
+- hardware friendy lookahead : 28720 cycles

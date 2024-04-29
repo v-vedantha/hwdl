@@ -300,7 +300,7 @@ class Custom_collider_assoc_lookahead():
         self.lookahead = lookahead
         self.left_storer = NextNStorer(lookahead, left)
         self.right_storer = NextNStorer(lookahead, right)
-        self.cycles = lookahead
+        self.cycles = 0
         for i in range(lookahead):
             self.left_storer.refill()
             self.right_storer.refill()    
