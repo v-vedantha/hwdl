@@ -28,6 +28,7 @@ Understand wether we are bottlenecked by the next intersection generator
 
 Results (just in case anyone actually looks at this repo):
 
+T = 10
 Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [80, 90] B = [90, 80]
 - Algorithmic ops:  576000
 - Real computes: 70074
