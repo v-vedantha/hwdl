@@ -44,3 +44,5 @@ Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [8, 900] B = 
 - extensor (with skip optimizations) : 35335 cycles
 - our custom version (lookahead) : 24940 cycles
 - hardware friendy lookahead : 28820 cycles
+
+Why not just use a vector pipeline? Causes you to need an NxN comparison. The idea here is we use the exact same hardware as the single-cycle version but get 20% better performance.
