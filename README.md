@@ -28,19 +28,19 @@ Understand wether we are bottlenecked by the next intersection generator
 
 Results (just in case anyone actually looks at this repo):
 
-T = 10
+
 Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [80, 90] B = [90, 80]
 - Algorithmic ops:  576000
-- Real computes: 70074
-- classic : 349415 cycles
-- extensor (with skip optimizations) : 311537 cycles
-- our custom version (lookahead) : 248786 cycles
-- hardware friendy lookahead : 264281 cycles
+- Real computes: 72281
+- classic : 351670 cycles
+- extensor (with skip optimizations) : 301565 cycles
+- our custom version (lookahead) : 253858 cycles
+- hardware friendy lookahead : 268569 cycles
 
 Simulating a matmul with parameters densityA 0.25 densityB 0.5 A = [8, 900] B = [900, 8]
 - Algorithmic ops:  57600
-- Real computes: 7233
-- classic : 35894 cycles
-- extensor (with skip optimizations) : 35450 cycles
-- our custom version (lookahead) : 25278 cycles
-- hardware friendy lookahead : 28720 cycles
+- Real computes: 7110
+- classic : 35956 cycles
+- extensor (with skip optimizations) : 35335 cycles
+- our custom version (lookahead) : 24940 cycles
+- hardware friendy lookahead : 28820 cycles

@@ -122,20 +122,20 @@ class Collider_with_skip():
         elif left.peek() < right.peek():
             # advance L up to the next checkpoint if possible
             # This operation is done in one cycle in the hardware implementation
-            min_index_with_checkpoint = list(filter(lambda x: x[1] < right.peek(), self.left_values))
+            min_index_with_checkpoint = list(filter(lambda x: x[1] <= right.peek(), self.left_values))
             if len(min_index_with_checkpoint) > 0 and left.current_index() < min_index_with_checkpoint[-1][0]:
                 left.move_head(min_index_with_checkpoint[-1][0])
             else:
                 left.get_next_element()
-            return NO_COLLISION
+            return MAYBE_COLLISION
         elif left.peek() > right.peek():
             # This operation is done in one cycle in the hardware implementation
-            min_index_with_checkpoint = list(filter(lambda x: x[1] < left.peek(), self.right_values))
+            min_index_with_checkpoint = list(filter(lambda x: x[1] <= left.peek(), self.right_values))
             if len(min_index_with_checkpoint) > 0 and right.current_index() < min_index_with_checkpoint[-1][0]:
                 right.move_head(min_index_with_checkpoint[-1][0])
             else:
                 right.get_next_element()
-            return NO_COLLISION
+            return MAYBE_COLLISION
         else:
             left.get_next_element()
             right.get_next_element()
