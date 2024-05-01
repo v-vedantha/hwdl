@@ -28,7 +28,7 @@ for trial in range(trials):
         for i in range(4):
             results[i][idx].add(temp[i][1])
 for i in range(4):
-    plt.errorbar(densities, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i])
+    plt.errorbar(densities, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=3)
 plt.xlabel('Density')
 plt.ylabel('Cycles')
 plt.title('Density vs Cycles for a 1000 length array')
@@ -56,7 +56,7 @@ for trial in range(trials):
             results[i][idx].add(temp[i][1])
 
 for i in range(4):
-    plt.errorbar(lengths, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i])
+    plt.errorbar(lengths, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=5)
 plt.xlabel('Density')
 plt.ylabel('Cycles')
 plt.title('Array length vs Cycles for a 0.05 dense length array')
@@ -81,8 +81,8 @@ for trial in range(trials):
         for i in range(4):
             results[i][idx].add(temp[i][1])
 
-for i in range(4):
-    plt.errorbar(Ts, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i])
+for i in range(1,4):
+    plt.errorbar(Ts, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=5)
 plt.xlabel('Buffer size')
 plt.ylabel('Cycles')
 plt.title('Buffer size vs Cycles for a 0.05 dense 1000 length array')
@@ -134,7 +134,7 @@ plt.xlabel('Skips')
 plt.ylabel('Frequency')
 plt.title('Skips for 0.05 dense 1000 length array')
 plt.legend()
-plt.savefig('plt5.png')
+plt.savefig('plt4.png')
 
 
 
