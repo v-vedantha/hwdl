@@ -162,6 +162,7 @@ class Custom_collider_lookahead():
         self.lookahead = lookahead
         self.left.get_next_element()
         self.right.get_next_element()
+        self.logged_skips = []
 
     def get_next_collision(self, left, right):
         # Normally it's just 
@@ -173,8 +174,9 @@ class Custom_collider_lookahead():
             # advance L up to the next checkpoint if possible
             # This operation is done in one cycle in the hardware implementation
             for i in range(self.lookahead, 1, -1):
-                if left.peek_ahead(i) is not None and left.peek_ahead(i-1) < right.peek():
+                if left.peek_ahead(i) is not None and left.peek_ahead(i-1) <= right.peek():
                     # print("Moving left by", i, "at ", left.peek())
+                    self.logged_skips.append(i)
                     left.move_head_relative(i)
                     # self.cycles += 1
                     return MAYBE_COLLISION
@@ -182,13 +184,15 @@ class Custom_collider_lookahead():
             #     print("Moving left")
             #     left.move_head_relative(self.lookahead)
             # else:
+            self.logged_skips.append(1)
             left.get_next_element()
             return NO_COLLISION
         elif left.peek() > right.peek():
             # This operation is done in one cycle in the hardware implementation
             for i in range(self.lookahead, 1, -1):
-                if right.peek_ahead(i) is not None and right.peek_ahead(i-1) < left.peek():
+                if right.peek_ahead(i) is not None and right.peek_ahead(i-1) <= left.peek():
                     # print("Moving right by", i , "at", right.peek())
+                    self.logged_skips.append(i)
                     right.move_head_relative(i)
                     # self.cycles += 1
                     return MAYBE_COLLISION
@@ -196,9 +200,11 @@ class Custom_collider_lookahead():
             #     print("Moving right")
             #     right.move_head_relative(self.lookahead)
             # else:
+            self.logged_skips.append(1)
             right.get_next_element()
             return NO_COLLISION
         else:
+            self.logged_skips.append(1)
             left.get_next_element()
             right.get_next_element()
             return COLLISION
@@ -207,6 +213,9 @@ class Custom_collider_lookahead():
         while True:
             if self.get_next_collision(self.left, self.right) == DONE:
                 return self.cycles
+
+    def get_skips(self):
+        return self.logged_skips
 
 class NextNStorer():
     def __init__(self, T, stream):
@@ -277,13 +286,14 @@ class NextNStorer():
             self.enq_next_val()
 
     def move_to_first_index_after(self, value):
-        viable_elements = list(filter(lambda x: x[1] >= value, self.values))
+        og = self.N
+        viable_elements = list(filter(lambda x: x[0] is not None and x[1] >= value, self.values))
         if len(viable_elements) > 0:
             result =  viable_elements[0][0]
             if (result > self.N):
                 self.N = result
                 self.enq_next_val()
-                return self.N
+                return self.N - og
             else:
                 return None
         else:
@@ -291,7 +301,7 @@ class NextNStorer():
             if (self.values[-1][1] < value and self.N < self.values[-1][0]):
                 self.N = self.values[-1][0]
                 self.enq_next_val()
-                return self.N
+                return self.N - og
             return None
 
 
@@ -309,6 +319,7 @@ class Custom_collider_assoc_lookahead():
         for i in range(lookahead):
             self.left_storer.refill()
             self.right_storer.refill()    
+        self.logged_skips = []
 
     def get_next_collision(self):
         # Normally it's just 
@@ -320,19 +331,26 @@ class Custom_collider_assoc_lookahead():
             # advance L up to the next checkpoint if possible
             # This operation is done in one cycle in the hardware implementation
             self.right_storer.refill()
-            if (self.left_storer.move_to_first_index_after(self.right_storer.peek()) is not None):
+            skipped = self.left_storer.move_to_first_index_after(self.right_storer.peek())
+            if (skipped is not None):
+                self.logged_skips.append(skipped)
                 return MAYBE_COLLISION
             else:
+                self.logged_skips.append(1)
                 self.left_storer.get_next_element()
         elif self.left_storer.peek() > self.right_storer.peek():
             # This operation is done in one cycle in the hardware implementation
             self.left_storer.refill()
-            if (self.right_storer.move_to_first_index_after(self.left_storer.peek()) is not None):
+            skipped =  self.right_storer.move_to_first_index_after(self.left_storer.peek())
+            if (skipped is not None):
+                self.logged_skips.append(skipped)
                 return MAYBE_COLLISION
             else:
+                self.logged_skips.append(1)
                 self.right_storer.get_next_element()
                 return NO_COLLISION
         else:
+            self.logged_skips.append(1)
             self.left_storer.get_next_element()
             self.right_storer.get_next_element()
             return COLLISION
@@ -341,6 +359,8 @@ class Custom_collider_assoc_lookahead():
         while True:
             if self.get_next_collision() == DONE:
                 return self.cycles
+    def get_skips(self):
+        return self.logged_skips
 
 
 
@@ -395,8 +415,73 @@ def test_matmul(densityA, densityB, M, K, N):
         if (collider == COLLIDER):
             print("Real computes:" ,computes)
         print(collider_names[collider], ":", cycles, "cycles")
+    
+def test_skips(densityA, densityB, M, K, N, T, N1, N2):
+    print("Simulating a matmul with parameters densityA", densityA, "densityB", densityB, "A =", [M, K], "B =", [K, N])
+    print("Algorithmic ops: ", M*K*N)
+    A = []
+    B = []
+    for i in range(M):
+        A.append(genList(K, densityA))
+    for i in range(N):
+        B.append(genList(K, densityB))
+
+    results = []
+    
+    for collider in [LOOKAHEAD, ASSOC]:
+        skips=[]
+        for left in A:
+            for right in B:
+                if collider == COLLIDER:
+                    c = Collider(ListGen(left), ListGen(right))
+                if collider == SKIP:
+                    c = Collider_with_skip(ListGen(left), ListGen(right), T)
+                if collider == LOOKAHEAD:
+                    c = Custom_collider_lookahead(ListGen(left), ListGen(right), N1)
+                if collider == ASSOC:
+                    c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), N2)
+                c.cycles_for_all_collisions()
+                skips += c.get_skips()
+        print(collider_names[collider], ":", skips, "skips")
+        results.append((collider, skips))
+
+    return results
 
 
+def test_matmul(densityA, densityB, M, K, N, T, N1, N2):
+    print("Simulating a matmul with parameters densityA", densityA, "densityB", densityB, "A =", [M, K], "B =", [K, N])
+    print("Algorithmic ops: ", M*K*N)
+    A = []
+    B = []
+    for i in range(M):
+        A.append(genList(K, densityA))
+    for i in range(N):
+        B.append(genList(K, densityB))
+
+    results = []
+    
+    for collider in [COLLIDER, SKIP, LOOKAHEAD, ASSOC]:
+        cycles=0
+        computes=0
+        for left in A:
+            for right in B:
+                if collider == COLLIDER:
+                    c = Collider(ListGen(left), ListGen(right))
+                if collider == SKIP:
+                    c = Collider_with_skip(ListGen(left), ListGen(right), T)
+                if collider == LOOKAHEAD:
+                    c = Custom_collider_lookahead(ListGen(left), ListGen(right), N1)
+                if collider == ASSOC:
+                    c = Custom_collider_assoc_lookahead(ListGen(left), ListGen(right), N2)
+                cycles += c.cycles_for_all_collisions()
+                if collider == COLLIDER:
+                    computes+=c.ops
+        if (collider == COLLIDER):
+            print("Real computes:" ,computes)
+        print(collider_names[collider], ":", cycles, "cycles")
+        results.append((collider, cycles))
+
+    return results
 
     
 
