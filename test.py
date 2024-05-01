@@ -173,7 +173,7 @@ class Custom_collider_lookahead():
             # advance L up to the next checkpoint if possible
             # This operation is done in one cycle in the hardware implementation
             for i in range(self.lookahead, 1, -1):
-                if left.peek_ahead(i) is not None and left.peek_ahead(i) <= right.peek():
+                if left.peek_ahead(i) is not None and left.peek_ahead(i-1) < right.peek():
                     # print("Moving left by", i, "at ", left.peek())
                     left.move_head_relative(i)
                     # self.cycles += 1
@@ -187,7 +187,7 @@ class Custom_collider_lookahead():
         elif left.peek() > right.peek():
             # This operation is done in one cycle in the hardware implementation
             for i in range(self.lookahead, 1, -1):
-                if right.peek_ahead(i) is not None and right.peek_ahead(i) <= left.peek():
+                if right.peek_ahead(i) is not None and right.peek_ahead(i-1) < left.peek():
                     # print("Moving right by", i , "at", right.peek())
                     right.move_head_relative(i)
                     # self.cycles += 1
@@ -276,10 +276,10 @@ class NextNStorer():
         if self.values[0][0] is None or self.values[0][0] < self.N:
             self.enq_next_val()
 
-    def move_to_next_index_before_or_equal_to(self, value):
-        viable_elements = list(filter(lambda x: x[1] <= value, self.values))
+    def move_to_first_index_after(self, value):
+        viable_elements = list(filter(lambda x: x[1] >= value, self.values))
         if len(viable_elements) > 0:
-            result =  viable_elements[-1][0]
+            result =  viable_elements[0][0]
             if (result > self.N):
                 self.N = result
                 self.enq_next_val()
@@ -287,6 +287,11 @@ class NextNStorer():
             else:
                 return None
         else:
+            # Else just move to the final element
+            if (self.values[-1][1] < value and self.N < self.values[-1][0]):
+                self.N = self.values[-1][0]
+                self.enq_next_val()
+                return self.N
             return None
 
 
@@ -315,14 +320,14 @@ class Custom_collider_assoc_lookahead():
             # advance L up to the next checkpoint if possible
             # This operation is done in one cycle in the hardware implementation
             self.right_storer.refill()
-            if (self.left_storer.move_to_next_index_before_or_equal_to(self.right_storer.peek()) is not None):
+            if (self.left_storer.move_to_first_index_after(self.right_storer.peek()) is not None):
                 return MAYBE_COLLISION
             else:
                 self.left_storer.get_next_element()
         elif self.left_storer.peek() > self.right_storer.peek():
             # This operation is done in one cycle in the hardware implementation
             self.left_storer.refill()
-            if (self.right_storer.move_to_next_index_before_or_equal_to(self.left_storer.peek()) is not None):
+            if (self.right_storer.move_to_first_index_after(self.left_storer.peek()) is not None):
                 return MAYBE_COLLISION
             else:
                 self.right_storer.get_next_element()
