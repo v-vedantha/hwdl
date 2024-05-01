@@ -83,9 +83,9 @@ for trial in range(trials):
 
 for i in range(4):
     plt.errorbar(Ts, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i])
-plt.xlabel('T/N')
+plt.xlabel('Buffer size')
 plt.ylabel('Cycles')
-plt.title('T/N vs Cycles for a 0.05 dense 1000 length array')
+plt.title('Buffer size vs Cycles for a 0.05 dense 1000 length array')
 # Show labels
 plt.legend()
 plt.savefig('plt3.png')

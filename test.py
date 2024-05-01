@@ -112,6 +112,8 @@ class Collider_with_skip():
         self.right_values = [(i, right.get_value_at(i)) for i in self.right_indices]
         self.left.get_next_element()
         self.right.get_next_element()
+        self.leftCanGoOver = len(left) <= T
+        self.rightCanGoOver = len(right) <= T
 
 
     def get_next_collision(self, left, right):
@@ -124,7 +126,10 @@ class Collider_with_skip():
             # This operation is done in one cycle in the hardware implementation
             min_index_with_checkpoint = list(filter(lambda x: x[1] <= right.peek(), self.left_values))
             if len(min_index_with_checkpoint) > 0 and left.current_index() < min_index_with_checkpoint[-1][0]:
-                left.move_head(min_index_with_checkpoint[-1][0])
+                if self.leftCanGoOver:
+                    left.move_head(min_index_with_checkpoint[-1][0]+1)
+                else:
+                    left.move_head(min_index_with_checkpoint[-1][0])
             else:
                 left.get_next_element()
             return MAYBE_COLLISION
@@ -132,7 +137,10 @@ class Collider_with_skip():
             # This operation is done in one cycle in the hardware implementation
             min_index_with_checkpoint = list(filter(lambda x: x[1] <= left.peek(), self.right_values))
             if len(min_index_with_checkpoint) > 0 and right.current_index() < min_index_with_checkpoint[-1][0]:
-                right.move_head(min_index_with_checkpoint[-1][0])
+                if self.rightCanGoOver:
+                    right.move_head(min_index_with_checkpoint[-1][0]+1)
+                else:
+                    right.move_head(min_index_with_checkpoint[-1][0])
             else:
                 right.get_next_element()
             return MAYBE_COLLISION
