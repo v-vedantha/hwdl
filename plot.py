@@ -9,18 +9,25 @@ class Trial:
         self.vals.append(val)
     def mean(self):
         return sum(self.vals) / len(self.vals)
-    def std(self):
-        return numpy.std(self.vals)
+    def relative_speedup(self, baseline):
+        return baseline.mean() / self.mean()
+    def std(self, baseline):
+        scaled_vals = []
+        for val in self.vals:
+            scaled_vals.append(baseline.mean() / val)
+        return numpy.std(scaled_vals)
+
+styles = ['solid', 'dashed', 'dotted', 'dashdot']
 
 trials = 10
 # Plot 1. N = T. 2 streams of the same length, but increasing density.
-densities = [0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+densities = [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
 results=[[],[],[],[]]
-buf=10
+buf=16
 for d in densities:
     for i in range(4):
         results[i].append(Trial())
-l = 1000
+l = 2000
 for trial in range(trials):
     for idx, d in enumerate(densities):
         temp = test_matmul(d, d, 1, l, 1, buf, buf, buf)
@@ -28,11 +35,14 @@ for trial in range(trials):
         assert(len(temp)   == 4)
         for i in range(4):
             results[i][idx].add(temp[i][1])
-for i in range(4):
-    plt.errorbar(densities, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=3)
-plt.xlabel('Density')
-plt.ylabel('Cycles')
-plt.title(f'Density vs Cycles for a {l} length array, buffer size {buf}')
+
+
+baseline = results[0]
+for i in range(1,4):
+    plt.errorbar(list(map(lambda x:x*100, densities)), list(map(lambda x : x[0].relative_speedup(x[1]), zip(results[i], baseline))), list(map(lambda x: x[0].std(x[1]), zip(results[i], baseline))), label=collider_names[i], capsize=3, linestyle=styles[i-1])
+plt.xlabel('Density (as %)')
+plt.ylabel('Relative Speedup')
+plt.title(f'Relative Speedup vs Density for a {l} Length Vectors (Buffer Size {buf})')
 # Show labels
 plt.legend()
 plt.savefig('plt1.png')
@@ -42,10 +52,10 @@ plt.clf()
 
 
 # Plot 2. N = T. 2 streams of the same sparsity, but increasing length.
-lengths = [100, 200, 300, 400, 500, 600, 700]
+lengths = [125, 250, 500, 1000, 1500, 2000]
 results=[[], [], [], []]
 density = 0.05
-buf = 10
+buf = 16
 for l in lengths:
     for i in range(4):
         results[i].append(Trial())
@@ -57,11 +67,14 @@ for trial in range(trials):
         for i in range(4):
             results[i][idx].add(temp[i][1])
 
-for i in range(4):
-    plt.errorbar(lengths, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=5)
-plt.xlabel('Density')
-plt.ylabel('Cycles')
-plt.title(f'Array length vs Cycles for a {density} dense {l} length array, buffer size {buf}')
+# for i in range(1):
+    # plt.errorbar(lengths, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i] + ' (no buffer)', capsize=3)
+baseline = results[0]
+for i in range(1,4):
+    plt.errorbar(lengths, list(map(lambda x : x[0].relative_speedup(x[1]), zip(results[i], baseline))), list(map(lambda x: x[0].std(x[1]), zip(results[i], baseline))), label=collider_names[i], capsize=5, linestyle=styles[i-1])
+plt.xlabel('Vector Length')
+plt.ylabel('Relative Speedup')
+plt.title(f'Relative Speedup vs Vector Length for {density*100}% Dense Vectors (Buffer Size {buf})')
 # Show labels
 plt.legend()
 plt.savefig('plt2.png')
@@ -83,11 +96,12 @@ for trial in range(trials):
         for i in range(4):
             results[i][idx].add(temp[i][1])
 
+baseline = results[0]
 for i in range(1,4):
-    plt.errorbar(Ts, list(map(lambda x : x.mean(), results[i])), list(map(lambda x: x.std(), results[i])), label=collider_names[i], capsize=5)
+    plt.errorbar(Ts, list(map(lambda x : x[0].relative_speedup(x[1]), zip(results[i], baseline))), list(map(lambda x: x[0].std(x[1]), zip(results[i], baseline))), label=collider_names[i], capsize=5, linestyle=styles[i-1])
 plt.xlabel('Buffer size')
-plt.ylabel('Cycles')
-plt.title(f'Buffer size vs Cycles for a {density} dense {length} length array')
+plt.ylabel('Relative Speedup')
+plt.title(f'Buffer Size vs Relative Speedup for {density*100}% Dense {length} Length Vectors')
 # Show labels
 plt.legend()
 plt.savefig('plt3.png')
@@ -130,14 +144,17 @@ plt.clf()
 
 # Plot a histogram of the results
 density = 0.05
-length = 1000
-buf = 10
+length = 100000
+buf = 16
 results = test_skips(density, density, 1, length, 1, buf, buf, buf)
-for result in results:
-    plt.hist(result[1], bins=8, label=collider_names[result[0]], alpha=0.5)
+for idx, result in enumerate(results):
+    if idx == 0:
+        plt.hist(result[1], bins=range(1, buf), label=collider_names[result[0]], alpha=0.7)
+    if idx == 1:
+        plt.hist(result[1], bins=range(1, buf), label=collider_names[result[0]], alpha=0.3)
 plt.xlabel('Skips')
 plt.ylabel('Frequency')
-plt.title(f'Skips for {density} dense {length} length array')
+plt.title(f'Skips for {density*100}% Dense {length} Length Vectors, Buffer Size {buf}')
 plt.legend()
 plt.savefig('plt4.png')
 

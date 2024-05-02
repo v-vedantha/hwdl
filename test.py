@@ -376,7 +376,6 @@ class Custom_collider_assoc_lookahead():
 
 # The idea is we can maybe buffer each thing. Hash it and shove it into buckets. Then look within that bucket.
 # Currently we can only look at one thing per cycle.
-# And then just fucking run it down like a retard
 
 def genList(length, density):
     uncompressed = [0] * length
@@ -392,7 +391,7 @@ COLLIDER = 0
 SKIP = 1
 LOOKAHEAD = 2
 ASSOC = 3
-collider_names = {COLLIDER : 'classic', SKIP : 'extensor (with skip optimizations)', LOOKAHEAD : 'our custom version (lookahead)', ASSOC : 'hardware friendy lookahead'}
+collider_names = {COLLIDER : 'classic', SKIP : 'extensor (with skip optimizations)', LOOKAHEAD : 'v1 (high bandwidth vector stream)', ASSOC : 'v2 (single element stream)'}
 def test_matmul(densityA, densityB, M, K, N):
     print("Simulating a matmul with parameters densityA", densityA, "densityB", densityB, "A =", [M, K], "B =", [K, N])
     print("Algorithmic ops: ", M*K*N)
