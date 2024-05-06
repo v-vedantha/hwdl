@@ -1,3 +1,8 @@
+For people just looking at this
+test.py contains the simulators for the 4 intersection units we evaluate
+plot.py runs the simulations and generates plots. Just run ```python plots.py ```
+
+
 So the plan is 
 1) We need to be able to simulate a really simple sparse matrix multiplication. Ideally this uses TEAAL or something.
 - Ok after testing, TEAAL is entirely unfeasable. Instead we need to come up with some way to argue that large matrices are useful.
